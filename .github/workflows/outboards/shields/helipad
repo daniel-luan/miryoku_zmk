@@ -1,0 +1,7 @@
+# Copyright 2022 Manna Harbour
+# https://github.com/manna-harbour/miryoku
+
+outboard_repository=daniel-luan/helipad-zmk-config
+outboard_ref=main
+outboard_from=boards/shields/helipad
+outboard_to=boards/shields/helipad
