@@ -13,3 +13,4 @@ jobs:
       alphas: '["QWERTY"]'
       modules: '["M165437/nice-view-gem/main"]'
       clipboard: '["mac"]'
+      zmk_studio: true
