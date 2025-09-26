@@ -341,6 +341,34 @@ jobs:
           west $west_debug zephyr-export
           echo "::endgroup::"
 
+          # sanitize multi-line variables
+          shield_arg_sanitized=$(echo "${{ steps.main.outputs.shield_arg }}" | tr '\n' ' ')
+          modules_arg_sanitized=$(echo "${{ steps.main.outputs.modules_arg }}" | tr '\n' ' ')
+          studio_rpc_arg_sanitized=$(echo "${{ steps.main.outputs.studio_rpc_arg }}" | tr '\n' ' ')
+
+          echo "::group::build command"
+          echo "Board: '${{ matrix.board }}'"
+          echo "Shield arg: \"$shield_arg_sanitized\""
+          echo "Modules arg: \"$modules_arg_sanitized\""
+          echo "Studio RPC arg: \"$studio_rpc_arg_sanitized\""
+          echo "Full build command:"
+          echo "west $west_debug build -b '${{ matrix.board }}' $west_build_debug -- \
+          '$shield_arg_sanitized' \
+          '$modules_arg_sanitized' \
+          '$studio_rpc_arg_sanitized' \
+          -DZMK_CONFIG='${GITHUB_WORKSPACE}/miryoku_zmk/config'"
+          echo "::endgroup::"
+
+          echo "::group::config files"
+          find "${GITHUB_WORKSPACE}/miryoku_zmk/config" -type f -print
+          for cfg in $(find "${GITHUB_WORKSPACE}/miryoku_zmk/config" -type f); do
+            echo "--- $cfg ---"
+            cat "$cfg" || true
+            echo
+          done
+          echo "::endgroup::"
+
+
           echo "::group::build"
           log='build.log'
           build_failed_message='::error::Build failed with exit code'
