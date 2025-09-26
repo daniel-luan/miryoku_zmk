@@ -15,3 +15,4 @@ jobs:
       custom_config: '["#define MIRYOKU_KLUDGE_THUMBCOMBOS"]'
       clipboard: '["mac"]'
       zmk_studio: true
+      kconfig: '["CONFIG_ZMK_STUDIO=y\nCONFIG_ZMK_POINTING=y\nCONFIG_ZMK_SLEEP=y\nCONFIG_ZMK_DISPLAY=y\nCONFIG_ZMK_DISPLAY_STATUS_SCREEN_CUSTOM=y"]'

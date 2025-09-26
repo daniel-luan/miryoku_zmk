@@ -138,23 +138,15 @@ jobs:
           mkdir "$artifact_dir"
 
           test "$MIRYOKU_DEBUG" = 'MIRYOKU_DEBUG_TRUE' && cp "$configfile" "$artifact_dir"
-          
-          if [ -n "${{ matrix.kconfig }}" -a "${{ matrix.kconfig }}" != 'default' ]
-          then
-            kconfig_file="${GITHUB_WORKSPACE}/miryoku_zmk/config/$keyboard_split.conf"
-            echo "${{ matrix.kconfig }}" >> "$kconfig_file"
-            test "$MIRYOKU_DEBUG" = 'MIRYOKU_DEBUG_TRUE' && cp "$kconfig_file" "$artifact_dir"
-            run_name="$run_name kconfig_"`echo "${{ matrix.kconfig }}" | md5sum | head -c "$hash_length"`
-          fi
 
           if [ "${{ matrix.zmk_studio }}" = "true" ]
           then
             case "$shield" in
               *left*|*dongle*)
                 # append to kconfig
-                kconfig_file="${GITHUB_WORKSPACE}/miryoku_zmk/config/$keyboard_split.conf"
-                echo "CONFIG_ZMK_STUDIO=y" >> "$kconfig_file"
-                test "$MIRYOKU_DEBUG" = 'MIRYOKU_DEBUG_TRUE' && cp "$kconfig_file" "$artifact_dir"
+                # kconfig_file="${GITHUB_WORKSPACE}/miryoku_zmk/config/$keyboard_split.conf"
+                # echo "CONFIG_ZMK_STUDIO=y" >> "$kconfig_file"
+                # test "$MIRYOKU_DEBUG" = 'MIRYOKU_DEBUG_TRUE' && cp "$kconfig_file" "$artifact_dir"
 
                 # add studio rpc arg
                 studio_rpc_arg="-S studio-rpc-usb-uart"
@@ -164,6 +156,15 @@ jobs:
                 ;;
             esac
             echo "studio_rpc_arg=$studio_rpc_arg" >> $GITHUB_OUTPUT
+          fi
+
+
+          if [ -n "${{ matrix.kconfig }}" -a "${{ matrix.kconfig }}" != 'default' ]
+          then
+            kconfig_file="${GITHUB_WORKSPACE}/miryoku_zmk/config/$keyboard_split.conf"
+            echo "${{ matrix.kconfig }}" >> "$kconfig_file"
+            test "$MIRYOKU_DEBUG" = 'MIRYOKU_DEBUG_TRUE' && cp "$kconfig_file" "$artifact_dir"
+            run_name="$run_name kconfig_"`echo "${{ matrix.kconfig }}" | md5sum | head -c "$hash_length"`
           fi
 
           if [ -n "${{ matrix.branches }}" -a "${{ matrix.branches }}" != 'default' ]
@@ -340,34 +341,6 @@ jobs:
           west $west_debug update
           west $west_debug zephyr-export
           echo "::endgroup::"
-
-          # sanitize multi-line variables
-          shield_arg_sanitized=$(echo "${{ steps.main.outputs.shield_arg }}" | tr '\n' ' ')
-          modules_arg_sanitized=$(echo "${{ steps.main.outputs.modules_arg }}" | tr '\n' ' ')
-          studio_rpc_arg_sanitized=$(echo "${{ steps.main.outputs.studio_rpc_arg }}" | tr '\n' ' ')
-
-          echo "::group::build command"
-          echo "Board: '${{ matrix.board }}'"
-          echo "Shield arg: \"$shield_arg_sanitized\""
-          echo "Modules arg: \"$modules_arg_sanitized\""
-          echo "Studio RPC arg: \"$studio_rpc_arg_sanitized\""
-          echo "Full build command:"
-          echo "west $west_debug build -b '${{ matrix.board }}' $west_build_debug -- \
-          '$shield_arg_sanitized' \
-          '$modules_arg_sanitized' \
-          '$studio_rpc_arg_sanitized' \
-          -DZMK_CONFIG='${GITHUB_WORKSPACE}/miryoku_zmk/config'"
-          echo "::endgroup::"
-
-          echo "::group::config files"
-          find "${GITHUB_WORKSPACE}/miryoku_zmk/config" -type f -print
-          for cfg in $(find "${GITHUB_WORKSPACE}/miryoku_zmk/config" -type f); do
-            echo "--- $cfg ---"
-            cat "$cfg" || true
-            echo
-          done
-          echo "::endgroup::"
-
 
           echo "::group::build"
           log='build.log'
